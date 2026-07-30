@@ -1,158 +1,204 @@
-## 📚 **Proje Ödevi: Flask Uygulamasını Docker, Gunicorn ve Nginx ile Deploy Etme**
+Car Rental System 🚗
 
-### **Proje Tanımı:**
-Bu projede, Python Flask ile geliştirilmiş bir araç kiralama uygulamasını Docker, Gunicorn, Nginx ve Terraform kullanarak bir EC2 instance’ına deploy etmeniz bekleniyor. Uygulamanız aşağıdaki adımları içermelidir:
+This project provides a modern car rental platform. It is a professional web application developed using the Flask framework and deployed with Nginx and Gunicorn.
 
-1. **Flask Uygulaması:** Python Flask kullanılarak geliştirilmiş basit bir araç kiralama platformu. Bu platform kullanıcıların araç kiralayabilmesi ve araçları görüntüleyebilmesini sağlar.
-2. **Docker Compose:** Uygulamanın birden fazla servisten oluşacak şekilde, her servisi bağımsız olarak çalıştıracak şekilde yapılandırılması. Servisler şunlardır:
-    - **app**: Flask uygulaması ve Gunicorn
-    - **mysql**: MySQL veritabanı
-    - **nginx**: Uygulama için reverse proxy görevi görecek Nginx sunucusu.
-3. **Nginx Konfigürasyonu:** Nginx, Flask uygulamasını internetten gelen taleplerle yönlendirecek şekilde yapılandırılmalıdır. Nginx, aynı zamanda SSL sertifikalarını da destekleyecek şekilde yapılandırılabilir.
+🌟 Features
+👥 User Operations
 
-### **Proje Adımları:**
+User registration and login
 
-1. **Dockerfile Yazımı:**
-   - Flask uygulamanızın Docker imajını oluşturacak `Dockerfile` yazılacaktır.
-   - Flask uygulamasının bağımlılıkları yüklenip çalıştırılacak, Gunicorn ile başlatılacak.
-   - `Dockerfile`'ın temel yapı taşları şunları içermelidir:
-     - Python 3.9 imajı kullanımı
-     - Gerekli bağımlılıkların yüklenmesi
-     - Gunicorn sunucusunun Flask uygulamasını çalıştırması
+Profile editing
 
-   **Dockerfile Örneği:**
-   ```dockerfile
-   # Base image
-   FROM python:3.9
+Password reset
 
-   # Set the working directory in the container
-   WORKDIR /app
+Email verification
 
-   # Copy the current directory contents into the container
-   COPY . /app
+🚙 Vehicle Operations
 
-   # Install dependencies
-   RUN pip install --no-cache-dir -r requirements.txt
+Vehicle listing and advanced search
 
-   # Expose port 8000 for Gunicorn
-   EXPOSE 8000
+Filtering by brand, model, year, and price
 
-   # Command to run the application using Gunicorn
-   CMD ["gunicorn", "-b", "0.0.0.0:8000", "wsgi:app"]
-   ```
+Vehicle detail view
 
-2. **Docker Compose Dosyası:**
-   - Docker Compose, uygulamanın `mysql`, `app` (Flask + Gunicorn), ve `nginx` (Reverse Proxy) servislerini yönetecek.
-   - Her bir servisin bağımsız olarak yapılandırılması sağlanacak.
-   
-   **Docker Compose Örneği:**
-   ```yaml
-   version: '3'
-   services:
-     app:
-       build: .
-       container_name: flask_app
-       environment:
-         - DB_HOST=mysql
-         - DB_USER=root
-         - DB_PASSWORD=rootpassword
-         - DB_NAME=arac_kiralama
-       depends_on:
-         - mysql
-       networks:
-         - app-network
-       ports:
-         - "8000:8000"
+Car rental and reservation
 
-     mysql:
-       image: mysql:5.7
-       container_name: mysql_container
-       environment:
-         MYSQL_ROOT_PASSWORD: rootpassword
-         MYSQL_DATABASE: arac_kiralama
-       networks:
-         - app-network
-       ports:
-         - "3306:3306"
+📊 Admin Panel
 
-     nginx:
-       image: nginx:latest
-       container_name: nginx_reverse_proxy
-       volumes:
-         - ./nginx.conf:/etc/nginx/nginx.conf
-       ports:
-         - "80:80"
-       depends_on:
-         - app
-       networks:
-         - app-network
+Statistics dashboard
 
-   networks:
-     app-network:
-       driver: bridge
-   ```
+Total number of vehicles
 
-3. **Nginx Yapılandırması:**
-   - Nginx, Flask uygulamasına gelen istekleri alacak ve Gunicorn ile çalışan Flask uygulamasına yönlendirecek.
-   
-   **nginx.conf Örneği:**
-   ```nginx
-   server {
-       listen 80;
-       server_name ${DOMAIN_NAME} www.${DOMAIN_NAME};
+Number of users
 
-       location / {
-           proxy_pass http://app:8000;
-           proxy_set_header Host $host;
-           proxy_set_header X-Real-IP $remote_addr;
-           proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-           proxy_set_header X-Forwarded-Proto $scheme;
-       }
-   }
-   ```
+Number of rentals
 
-4. **Terraform ile EC2 Deploy:**
-   - Terraform, AWS üzerinde EC2 instance'ı başlatacak ve Docker Compose'u EC2 üzerinde çalıştıracaktır.
-   
-   **Terraform Örneği:**
-   ```hcl
-   provider "aws" {
-     region = "us-east-1"
-   }
+Total revenue
 
-   resource "aws_instance" "flask_app" {
-     ami           = "ami-0c55b159cbfafe1f0" # Uygun bir EC2 AMI ID'si
-     instance_type = "t2.micro"
+Vehicle management
 
-     tags = {
-       Name = "FlaskAppInstance"
-     }
+User management
 
-     user_data = <<-EOF
-       #!/bin/bash
-       apt update -y
-       apt install -y docker.io
-       apt install -y docker-compose
-       cd /home/ubuntu
-       git clone https://github.com/kullanici/arac-kiralama.git
-       cd arac-kiralama
-       docker-compose up -d
-     EOF
-   }
-   ```
+Rental tracking
 
-### **Ödevde İstenilenler:**
+🛠️ Technologies
 
-1. **Dockerfile ve Docker Compose Dosyalarını Oluşturma:**
-   - Flask uygulamasını Docker ile çalıştırabilecek şekilde Dockerfile yazılmalıdır.
-   - `docker-compose.yml` dosyası ile MySQL, Nginx, ve Flask servisleri yapılandırılmalıdır.
+Backend: Python Flask
 
-2. **Uygulamayı Çalıştırma:**
-   - Docker Compose kullanarak uygulama başlatılmalıdır.
-   - Nginx’in Flask uygulaması ile doğru bir şekilde çalıştığından emin olunmalıdır.
+Frontend: HTML, CSS, JavaScript
 
-3. **Terraform ile EC2 Üzerine Deploy Etme:**
-   - Terraform ile bir EC2 instance’ı başlatılmalı ve Docker Compose çalıştırılmalıdır.
+Database: MySQL
 
-4. **Projenin Repoya Yüklenmesi:**
-   - Tüm dosyalar bir GitHub reposuna yüklenmelidir.
+Web Server: Nginx
+
+WSGI Server: Gunicorn
+
+Deployment: Ubuntu Server
+
+📋 Requirements
+python3
+python3-venv
+mysql-server
+nginx
+
+🚀 Installation
+
+Clone the repository:
+
+git clone https://github.com/username/car-rental.git
+cd car-rental
+
+
+Set environment variables:
+
+cp .env.example .env
+# Edit the .env file
+
+
+Create a virtual environment:
+
+python3 -m venv venv
+source venv/bin/activate
+
+
+Install dependencies:
+
+pip install -r requirements.txt
+
+
+Create the database:
+
+mysql -u root -p
+CREATE DATABASE car_rental;
+
+
+Start the application:
+
+./deploy.sh
+
+🔧 Deployment
+
+Required deployment files:
+
+1. Nginx Configuration
+server {
+    listen 80;
+    server_name your_domain.com;
+
+    location / {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
+
+2. Gunicorn Service File
+[Unit]
+Description=Gunicorn instance for car rental app
+After=network.target
+
+[Service]
+User=ubuntu
+WorkingDirectory=/path/to/app
+ExecStart=/path/to/venv/bin/gunicorn --workers 4 wsgi:app
+
+[Install]
+WantedBy=multi-user.target
+
+📝 Usage
+
+/register – New user registration
+
+/login – User login
+
+/search – Vehicle search
+
+/profile – Profile management
+
+/statistics – Admin statistics
+
+👥 Roles
+Regular User
+
+Search and view vehicles
+
+Rent a vehicle
+
+Edit profile
+
+Admin
+
+All regular user permissions
+
+View statistics
+
+Manage vehicles and users
+
+🔒 Security
+
+Password hashing
+
+SQL injection protection
+
+XSS protection
+
+CSRF protection
+
+Rate limiting
+
+📈 Performance
+
+Nginx reverse proxy
+
+Gunicorn multi-worker setup
+
+Database indexing
+
+Static file caching
+
+🤝 Contributing
+
+Fork the repository
+
+Create a feature branch
+
+Commit your changes
+
+Push your branch
+
+Open a pull request
+
+📄 License
+
+This project is licensed under the MIT License. See the LICENSE
+ file for details.
+
+📞 Contact
+
+Website: www.techprodevops.com
+
+Email: info@techprodevops.com
+
+🙏 Acknowledgements
+
+Thanks to everyone who contributed to this project!

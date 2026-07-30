@@ -41,7 +41,7 @@ def allowed_file(filename):
 DB_USER = os.getenv('DB_USER', 'admin')
 DB_PASSWORD = os.getenv('DB_PASSWORD', '')
 DB_HOST = os.getenv('DB_HOST', 'localhost')
-DB_NAME = os.getenv('DB_NAME', 'araba_kiralama')
+DB_NAME = os.getenv('DB_NAME', 'car_rental')
 
 def validate_dates(baslangic, bitis):
     """Kiralama tarihlerini doğrular"""
@@ -816,13 +816,14 @@ def seed_database():
 def init_database():
     """Veritabanını başlat ve gerekli kontrolleri yap"""
     try:
-        with app.app_context():  # Burada app context'i açıyoruz
-            db.create_all()  # Tabloları oluşturmak için db.create_all()'i çalıştırıyoruz
+        # Önce SQLAlchemy ile tabloları oluştur
+        with app.app_context():
+            db.create_all()
             logging.info("Veritabanı tabloları kontrol edildi/oluşturuldu.")
             
             # Veritabanı güncellemelerini yap
             update_database()
-
+            
             # Admin kullanıcısını kontrol et ve yoksa oluştur
             admin = User.query.filter_by(username='admin').first()
             if not admin:
@@ -847,7 +848,6 @@ def init_database():
         logging.error(f"Veritabanı başlatılırken hata oluştu: {e}")
         raise e
 
-
 def create_app():
     """Flask uygulamasını oluştur ve yapılandır"""
     try:
@@ -855,13 +855,12 @@ def create_app():
         os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
         
         # Veritabanını başlat
-        init_database()  # Burada veritabanı başlatılıyor
+        init_database()
         
         return app
     except Exception as e:
         logging.error(f"Uygulama oluşturulurken hata oluştu: {e}")
         raise e
-
 
 if __name__ == '__main__':
     try:
