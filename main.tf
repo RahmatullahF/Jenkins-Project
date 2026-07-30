@@ -25,7 +25,7 @@ resource "aws_instance" "managed_nodes" {
   instance_type = "t3a.medium"
   key_name = var.key
   vpc_security_group_ids = [aws_security_group.tf-sec-gr.id]
-  iam_instance_profile = "jenkins-project-profile-${var.user}"
+  iam_instance_profile = "jenkins-server-profile-${var.user}"
   tags = {
     Name = "jenkins_project"
   }
