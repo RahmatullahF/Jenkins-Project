@@ -9,7 +9,7 @@ services:
       - DB_USER=admin
       - DB_PASSWORD=admin123
       - DB_HOST=db
-      - DB_NAME=araba_kiralama
+      - DB_NAME=car_rental
     ports:
       - "8000:8000"
     depends_on:
@@ -24,7 +24,7 @@ services:
     container_name: mysql-db
     environment:
       MYSQL_ROOT_PASSWORD: Rp123456
-      MYSQL_DATABASE: araba_kiralama
+      MYSQL_DATABASE: car_rental
       MYSQL_USER: admin
       MYSQL_PASSWORD: admin123
     ports:
